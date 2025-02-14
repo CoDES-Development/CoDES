@@ -114,7 +114,7 @@ CoDES-based HPCC is implemented in `src/rdma` under the `RDMA` branch.
 
 
 ## CoDES-based RIP
-CoDES-based MPI is implemented in `src/rip` under the `RIP` branch. 
+CoDES-based RIP is implemented in `src/rip` under the `RIP` branch. 
 
 - **rip-CoDES**: defines `RipRoutingTableEntry` for managing routing table entries, and `Rip`, which implements the RIP protocol, including route initialization, updates, reception, transmission, and selection. It incorporates methods for table management (addition, deletion, and lookup), supports both triggered and periodic updates, implements split horizon strategies to avoid routing loops, manages packet routing via `RouteOutput()` and `RouteInput()`, and provides interfaces for handling interface status and address changes.
 - **rip-header-CoDES**: defines the data structures for the RIP protocol's header formats, encompassing both route table entries (RTEs) and the RIP header itself. `RipRte` represents a RIP route table entry, encapsulating information such as prefix, subnet mask, route tag, metric, and next hop. `RipHeader` represents the RIP protocol header, containing the command type (request or response) and a list of `RipRte` instances. 
