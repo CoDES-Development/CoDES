@@ -10,30 +10,25 @@ A simple example to show how to use CoDES-based MPI under the `MPI` branch.
 cmake -DCMAKE_BUILD_TYPE=Debug -DNS3_MPI=ON -G 'CodeBlocks - Unix Makefiles' -S . -B build
 ```
 
-2. Configure NS-3.
-``` shell
-./ns3 configure
-```
-
 ### Preparing Trace Files
 1. The HPCG trace files are already in `scrach/rn/traces`, and the file format is as follows.
 ``` shell
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0000.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0001.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0002.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0003.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0004.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0005.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0006.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0007.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0008.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0009.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0010.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0011.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0012.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0013.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0014.bin
-scratch\rn\traces\HPCG\dumpi-2023.03.31.06.35.04-0015.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0000.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0001.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0002.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0003.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0004.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0005.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0006.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0007.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0008.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0009.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0010.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0011.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0012.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0013.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0014.bin
+scratch/rn/traces/HPCG/dumpi-2023.03.31.06.35.04-0015.bin
 ```
 
 2. The AMR, IMB, LULESH, miniFE, Nekbone trace files are already in `scrach/rn/traces` as well.
@@ -103,7 +98,7 @@ CoDES-based MPI is implemented in `src/mpi-application` under the `MPI` branch.
 
 - **mpi-application**: is seamlessly compatible with the original NS-3 application and can manage the creation, initialization, execution, blocking behavior, and destruction of the communicator.
 - **mpi-communicator**: supports both point-to-point and collective communication operations like Ring AllReduce in MPI, and allows querying communicator parameters, such as the number of bytes transmitted or received and the size of the communication group.
-- **mpi-function**: translate DUMPI trace into corresponding MPI communication operations.
+- **mpi-functions**: translate DUMPI trace into corresponding MPI communication operations.
 - **mpi-datatype**: supports different data type in MPI.
 - **mpi-exception**: handles exceptions in MPI.
 
@@ -125,7 +120,7 @@ CoDES-based MPI is implemented in `src/rip` under the `RIP` branch.
 - **rip-header-CoDES**: defines the data structures for the RIP protocol's header formats, encompassing both route table entries (RTEs) and the RIP header itself. `RipRte` represents a RIP route table entry, encapsulating information such as prefix, subnet mask, route tag, metric, and next hop. `RipHeader` represents the RIP protocol header, containing the command type (request or response) and a list of `RipRte` instances. 
 
 ## Tips
-- **Recommended compiler**: The latest version of the GCC compiler(GCC-13 used in CoDES). Previous versions may have some bugs that could cause errors.
+- **Recommended compiler**: GCC-13 and later versions. Previous versions may have some bugs that could cause errors.
 
 ## Credit
 This repository contains code from the repository of NS-3:
