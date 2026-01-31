@@ -1,0 +1,1 @@
+mpirun -np 2 ../../build/scratch/parallel-simulation-demo/ns3-dev-demo-codes-simple-distributed-default --verbose=true
