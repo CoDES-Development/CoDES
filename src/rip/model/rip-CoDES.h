@@ -8,6 +8,7 @@
 #include "ns3/abort.h"
 #include "ns3/assert.h"
 #include "ns3/coroutine-module.h"
+#include "ns3/coroutine-datagram-socket.h"
 #include "ns3/enum.h"
 #include "ns3/inet-socket-address.h"
 #include "ns3/ipv4-interface.h"
@@ -25,6 +26,8 @@
 #include "ns3/uinteger.h"
 
 #include <list>
+#include <memory>
+#include <vector>
 
 namespace ns3 {
     /**
@@ -248,6 +251,11 @@ namespace ns3 {
             SocketList m_unicastSocketList; //!< list of sockets for unicast messages (socket, interface index)
             Ptr<Socket> m_multicastRecvSocket; //!< multicast receive socket
 
+            /// Datagram coroutine sockets held for lifetime (avoids premature destruction)
+            std::vector<std::shared_ptr<CoroutineDatagramSocket>> m_coroutineSockets;
+            /// Per-socket coroutine receive loops (held for lifetime)
+            std::vector<CoroutineOperation<void>> m_receiveLoops;
+
             EventId m_nextUnsolicitedUpdate; //!< Next Unsolicited Update event
             EventId m_nextTriggeredUpdate;   //!< Next Triggered Update event
 
@@ -317,6 +325,21 @@ namespace ns3 {
             * \param socket the socket the packet was received to.
             */
             void Receive(Ptr<Socket> socket);
+
+            /**
+            * \brief Coroutine receive loop: co_await datagrams and dispatch to ProcessRipPacket.
+            * \param cds the datagram coroutine socket
+            * \param socket the underlying ns-3 socket (for tag/interface resolution)
+            */
+            CoroutineOperation<void> ReceiveLoop(std::shared_ptr<CoroutineDatagramSocket> cds, Ptr<Socket> socket);
+
+            /**
+            * \brief Parse and dispatch a received RIP datagram (shared by Receive/ReceiveLoop).
+            * \param packet the received packet (with tags)
+            * \param sender the sender address
+            * \param socket the socket the packet was received on
+            */
+            void ProcessRipPacket(Ptr<Packet> packet, Address sender, Ptr<Socket> socket);
 
             /**
             * \brief Handle RIP requests.

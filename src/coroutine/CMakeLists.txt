@@ -19,12 +19,14 @@ build_lib(
         IGNORE_PCH
         SOURCE_FILES
         model/coroutine-socket.cpp
+        model/coroutine-datagram-socket.cpp
         HEADER_FILES
         model/operation.h
         model/awaitable.h
         model/operation-trait.h
         model/operation-type.h
         model/coroutine-socket.h
+        model/coroutine-datagram-socket.h
         LIBRARIES_TO_LINK
             ${libcore}
             ${libnetwork}

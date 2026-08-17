@@ -212,8 +212,9 @@ namespace ns3 {
                 socket->Bind(local);
                 socket->SetIpRecvTtl(true);
                 socket->SetRecvPktInfo(true);
-                auto coroutineSocket = std::make_shared<CoroutineSocket>(socket);
-                coroutineSocket->receive();
+                auto datagramSocket = std::make_shared<CoroutineDatagramSocket>(socket);
+                m_coroutineSockets.push_back(datagramSocket);
+                m_receiveLoops.push_back(ReceiveLoop(datagramSocket, socket));
 
                 m_unicastSocketList[socket] = i;
             }
@@ -231,8 +232,9 @@ namespace ns3 {
             m_multicastRecvSocket->Bind(local);
             m_multicastRecvSocket->SetIpRecvTtl(true);
             m_multicastRecvSocket->SetRecvPktInfo(true);
-            auto coroutineSocket = std::make_shared<CoroutineSocket>(m_multicastRecvSocket);
-            coroutineSocket->receive();
+            auto datagramSocket = std::make_shared<CoroutineDatagramSocket>(m_multicastRecvSocket);
+            m_coroutineSockets.push_back(datagramSocket);
+            m_receiveLoops.push_back(ReceiveLoop(datagramSocket, m_multicastRecvSocket));
             std::cout << "Rip::NotifyInterfaceUp() multicastRecv" << std::endl;
         }
     }
@@ -432,6 +434,14 @@ namespace ns3 {
         }
         m_unicastSocketList.clear();
 
+        for (auto &cds : m_coroutineSockets) {
+            if (cds) {
+                cds->close();
+            }
+        }
+        m_coroutineSockets.clear();
+        m_receiveLoops.clear();
+
         m_multicastRecvSocket->Close();
         m_multicastRecvSocket = nullptr;
 
@@ -476,8 +486,9 @@ namespace ns3 {
 
                     socket->SetIpRecvTtl(true);
                     socket->SetRecvPktInfo(true);
-                    auto coroutineSocket = std::make_shared<CoroutineSocket>(socket);
-                    coroutineSocket->receive();
+                    auto datagramSocket = std::make_shared<CoroutineDatagramSocket>(socket);
+                    m_coroutineSockets.push_back(datagramSocket);
+                    m_receiveLoops.push_back(ReceiveLoop(datagramSocket, socket));
 
                     m_unicastSocketList[socket] = i;
                 }
@@ -497,8 +508,9 @@ namespace ns3 {
             m_multicastRecvSocket->Bind(local);
             m_multicastRecvSocket->SetIpRecvTtl(true);
             m_multicastRecvSocket->SetRecvPktInfo(true);
-            auto coroutineSocket = std::make_shared<CoroutineSocket>(m_multicastRecvSocket);
-            coroutineSocket->receive();
+            auto datagramSocket = std::make_shared<CoroutineDatagramSocket>(m_multicastRecvSocket);
+            m_coroutineSockets.push_back(datagramSocket);
+            m_receiveLoops.push_back(ReceiveLoop(datagramSocket, m_multicastRecvSocket));
             std::cout << "Rip::DoInitialize() multicast" << std::endl;
         }
 
@@ -518,6 +530,7 @@ namespace ns3 {
 
     void Rip::SendUnsolicitedRouteUpdate() {
         NS_LOG_FUNCTION(this);
+        std::cout << "DBG SendUnsolicitedRouteUpdate fired t=" << Simulator::Now().GetSeconds() << std::endl;
 
         if (m_nextTriggeredUpdate.IsRunning()) {
             m_nextTriggeredUpdate.Cancel();
@@ -687,6 +700,23 @@ namespace ns3 {
 
         Address sender;
         Ptr<Packet> packet = socket->RecvFrom(sender);
+        ProcessRipPacket(packet, sender, socket);
+    }
+
+    CoroutineOperation<void> Rip::ReceiveLoop(std::shared_ptr<CoroutineDatagramSocket> cds, Ptr<Socket> socket) {
+        while (true) {
+            auto [packet, sender, err] = co_await cds->receiveFrom();
+            if (!packet || err != Socket::ERROR_NOTERROR) {
+                break;
+            }
+            ProcessRipPacket(packet, sender, socket);
+        }
+        co_return;
+    }
+
+    void Rip::ProcessRipPacket(Ptr<Packet> packet, Address sender, Ptr<Socket> socket) {
+        NS_LOG_FUNCTION(this << socket);
+
         InetSocketAddress senderAddr = InetSocketAddress::ConvertFrom(sender);
         NS_LOG_INFO("Received " << *packet << " from " << senderAddr.GetIpv4() << ":" << senderAddr.GetPort());
 
